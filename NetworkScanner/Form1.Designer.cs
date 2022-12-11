@@ -35,6 +35,13 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.StartButton = new System.Windows.Forms.Button();
+            this.PortButton = new System.Windows.Forms.Button();
+            this.MinPortUpDown = new System.Windows.Forms.NumericUpDown();
+            this.MaxPortUpDown = new System.Windows.Forms.NumericUpDown();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            ((System.ComponentModel.ISupportInitialize)(this.MinPortUpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.MaxPortUpDown)).BeginInit();
             this.SuspendLayout();
             // 
             // AdminLabel
@@ -55,7 +62,7 @@
             this.IPBox.ForeColor = System.Drawing.SystemColors.MenuHighlight;
             this.IPBox.FormattingEnabled = true;
             this.IPBox.ItemHeight = 31;
-            this.IPBox.Location = new System.Drawing.Point(251, 25);
+            this.IPBox.Location = new System.Drawing.Point(28, 25);
             this.IPBox.Name = "IPBox";
             this.IPBox.Size = new System.Drawing.Size(343, 252);
             this.IPBox.TabIndex = 1;
@@ -110,12 +117,87 @@
             this.StartButton.UseVisualStyleBackColor = true;
             this.StartButton.Click += new System.EventHandler(this.button1_Click);
             // 
+            // PortButton
+            // 
+            this.PortButton.Enabled = false;
+            this.PortButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.PortButton.Location = new System.Drawing.Point(414, 25);
+            this.PortButton.Name = "PortButton";
+            this.PortButton.Size = new System.Drawing.Size(252, 74);
+            this.PortButton.TabIndex = 7;
+            this.PortButton.Text = "Scan selected for open ports";
+            this.PortButton.UseVisualStyleBackColor = true;
+            this.PortButton.Click += new System.EventHandler(this.PortButton_Click);
+            // 
+            // MinPortUpDown
+            // 
+            this.MinPortUpDown.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.MinPortUpDown.Location = new System.Drawing.Point(414, 105);
+            this.MinPortUpDown.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.MinPortUpDown.Name = "MinPortUpDown";
+            this.MinPortUpDown.Size = new System.Drawing.Size(104, 31);
+            this.MinPortUpDown.TabIndex = 8;
+            this.MinPortUpDown.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            // 
+            // MaxPortUpDown
+            // 
+            this.MaxPortUpDown.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.MaxPortUpDown.Location = new System.Drawing.Point(562, 105);
+            this.MaxPortUpDown.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.MaxPortUpDown.Name = "MaxPortUpDown";
+            this.MaxPortUpDown.Size = new System.Drawing.Size(104, 31);
+            this.MaxPortUpDown.TabIndex = 9;
+            this.MaxPortUpDown.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label3.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.label3.Location = new System.Drawing.Point(445, 139);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(41, 24);
+            this.label3.TabIndex = 10;
+            this.label3.Text = "Min";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label4.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.label4.Location = new System.Drawing.Point(591, 139);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(46, 24);
+            this.label4.TabIndex = 11;
+            this.label4.Text = "Max";
+            // 
             // MainForm
             // 
             this.AcceptButton = this.StartButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(884, 561);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.MaxPortUpDown);
+            this.Controls.Add(this.MinPortUpDown);
+            this.Controls.Add(this.PortButton);
             this.Controls.Add(this.StartButton);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -128,6 +210,8 @@
             this.Name = "MainForm";
             this.Text = "NetworkSweeper";
             this.Load += new System.EventHandler(this.Form1_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.MinPortUpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.MaxPortUpDown)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -142,6 +226,11 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button StartButton;
+        private System.Windows.Forms.Button PortButton;
+        private System.Windows.Forms.NumericUpDown MinPortUpDown;
+        private System.Windows.Forms.NumericUpDown MaxPortUpDown;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
     }
 }
 

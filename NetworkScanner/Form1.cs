@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Net.Sockets;
 using System.Data;
 using System.Net.NetworkInformation;
 using System.Linq;
@@ -15,6 +15,9 @@ namespace NetworkScanner
     public partial class MainForm : Form
     {
         private bool IsUserElevated = false;
+
+        private List<IPAddress> currentAddresses = new List<IPAddress>();
+
         public MainForm()
         {
             InitializeComponent();
@@ -36,11 +39,13 @@ namespace NetworkScanner
 
         private void IPBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            
+            if (IPBox.SelectedItem != null) PortButton.Enabled = true;
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
+            IPBox.Items.Clear();
+
             string MinIPText = IPFromBox.Text;
             string MaxIPText = IPToBox.Text;
 
@@ -51,6 +56,8 @@ namespace NetworkScanner
             }
 
             List<IPAddress> allIPS = GetAllIPSInRange(MinIPText, MaxIPText);
+
+            if (allIPS == null) return;
 
             ScanList(allIPS);
         }
@@ -67,7 +74,9 @@ namespace NetworkScanner
             {
                 if (reply.Status == IPStatus.Success)
                 {
-                    IPBox.Items.Add(reply.Address.ToString());
+                    IPBox.Items.Add(reply.Address.ToString() + " in " + reply.RoundtripTime + "ms");
+                    currentAddresses.Add(reply.Address);
+
                     nSuccesses++;
                 }
             }
@@ -79,7 +88,14 @@ namespace NetworkScanner
         {
             List<IPAddress> ips = new List<IPAddress>();
 
-            string IPTrimmed = minText.Remove(minText.LastIndexOf('.'));
+            string IPMinTrimmed = minText.Remove(minText.LastIndexOf('.'));
+            string IPMaxTrimmed = maxText.Remove(maxText.LastIndexOf('.'));
+
+            if (!IPMinTrimmed.Equals(IPMaxTrimmed))
+            {
+                MessageBox.Show("Cannot start scan, two different subnets have been entered.");
+                return null;
+            }
 
             int min = GetIPEndValue(minText);
             int max = GetIPEndValue(maxText);
@@ -92,7 +108,7 @@ namespace NetworkScanner
 
             for (int i = min; i <= max; i++)
             {
-                IPAddress ip = IPAddress.Parse(IPTrimmed + "." + i.ToString());
+                IPAddress ip = IPAddress.Parse(IPMinTrimmed + "." + i.ToString());
 
                 ips.Add(ip);
             }
@@ -117,6 +133,49 @@ namespace NetworkScanner
         private int GetIPEndValue(string s)
         {
             return Convert.ToInt32(s.Substring(s.LastIndexOf('.') + 1));
+        }
+
+        private void PortButton_Click(object sender, EventArgs e)
+        {
+            int min = (int)MinPortUpDown.Value;
+            int max = (int)MaxPortUpDown.Value;
+
+            if(min > max)
+            {
+                MessageBox.Show("Cannot start port scan, minimum port is bigger than maximum port.");
+                return;
+            }
+
+            string result = string.Empty;
+
+            IPAddress selectedIP = currentAddresses[IPBox.SelectedIndex];
+
+            string IPString = selectedIP.ToString();
+
+            using (TcpClient scanner = new TcpClient())
+            {
+                for(int port = min; port < max; port++)
+                {
+                    try
+                    {
+                        scanner.Connect(selectedIP, port);
+                        result += (port + " OPEN at address " + IPString);
+                        scanner.Close();
+                    }
+                    catch
+                    {
+                        // port is closed, but we do not write it out 
+                    }
+                }
+            }
+
+            if(result == string.Empty)
+            {
+                MessageBox.Show("No open ports found on this device.");
+                return;
+            }
+
+            MessageBox.Show(result);
         }
     }
 }
