@@ -135,7 +135,25 @@ namespace NetworkScanner
             return Convert.ToInt32(s.Substring(s.LastIndexOf('.') + 1));
         }
 
-        private void PortButton_Click(object sender, EventArgs e)
+        private async Task<string> TryConnectPort(IPAddress IP, int port)
+        {
+            using (TcpClient scanner = new TcpClient())
+            {
+                try
+                {
+                    await scanner.ConnectAsync(IP, port);
+                    return port + " OPEN at address " + IP.ToString() + "\n";
+                }
+                catch
+                {
+                    // port is closed, but we do not write it out 
+                }
+            }
+
+            return null;
+        }
+
+        private async void PortButton_Click(object sender, EventArgs e)
         {
             int min = (int)MinPortUpDown.Value;
             int max = (int)MaxPortUpDown.Value;
@@ -146,36 +164,28 @@ namespace NetworkScanner
                 return;
             }
 
-            string result = string.Empty;
+            string toShow = string.Empty;
 
             IPAddress selectedIP = currentAddresses[IPBox.SelectedIndex];
 
             string IPString = selectedIP.ToString();
-
-            using (TcpClient scanner = new TcpClient())
+            
+            for(int port = min; port < max; port++)
             {
-                for(int port = min; port < max; port++)
-                {
-                    try
-                    {
-                        scanner.Connect(selectedIP, port);
-                        result += (port + " OPEN at address " + IPString);
-                        scanner.Close();
-                    }
-                    catch
-                    {
-                        // port is closed, but we do not write it out 
-                    }
-                }
-            }
+                string scanResult = await TryConnectPort(selectedIP, port);
 
-            if(result == string.Empty)
+                if (scanResult == null) continue;
+
+                toShow += scanResult;
+            }
+            
+            if(toShow == string.Empty)
             {
                 MessageBox.Show("No open ports found on this device.");
                 return;
             }
 
-            MessageBox.Show(result);
+            MessageBox.Show(toShow);
         }
     }
 }
