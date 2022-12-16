@@ -9,6 +9,7 @@ using System.Security.Principal;
 using System.Windows.Forms;
 using System.Net;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace NetworkScanner
 {
@@ -59,10 +60,10 @@ namespace NetworkScanner
 
             if (allIPS == null) return;
 
-            ScanList(allIPS);
+            ScanListAsync(allIPS);
         }
 
-        private async void ScanList(List<IPAddress> ips)
+        private async void ScanListAsync(List<IPAddress> ips)
         {
             int nSuccesses = 0;
 
@@ -142,7 +143,7 @@ namespace NetworkScanner
                 try
                 {
                     await scanner.ConnectAsync(IP, port);
-                    return port + " OPEN at address " + IP.ToString() + "\n";
+                    return "Port " + port + " OPEN at address " + IP.ToString() + "\n";
                 }
                 catch
                 {
@@ -151,6 +152,58 @@ namespace NetworkScanner
             }
 
             return null;
+        }
+
+        private List<PortRange> ChunkRangeBy(int min, int max, int chunkSize)
+        {
+            int previous = min;
+
+            List<PortRange> ranges = new List<PortRange>();
+
+            for(int i = min; i < max; i++)
+            {
+                if (i % chunkSize == 0) 
+                {
+                    ranges.Add(new PortRange(previous, i));
+                    previous = i;
+                }
+            }
+
+            return ranges;
+        }
+
+        private async Task<string> ScanPortRange(int min, int max, IPAddress IP)
+        {
+
+            // TODO: asyncokat visszarakni
+            string retval = string.Empty;
+
+            List<Task> allTasks = new List<Task>();
+
+            List<PortRange> chunks = ChunkRangeBy(min, max, 3);
+
+            foreach (PortRange range in chunks)
+            {
+                Task t = Task.Run(async () => {
+                    
+                    Thread.CurrentThread.IsBackground = true;
+
+                    for (int port = range.Min; port < range.Max; port++)
+                    {
+                        string scanResult = await TryConnectPort(IP, port);
+
+                        if (scanResult == null) continue;
+
+                        retval += scanResult;
+                    }
+                });
+
+                allTasks.Add(t);
+            }
+
+            Task.WaitAll(allTasks.ToArray());
+
+            return retval;
         }
 
         private async void PortButton_Click(object sender, EventArgs e)
@@ -164,20 +217,9 @@ namespace NetworkScanner
                 return;
             }
 
-            string toShow = string.Empty;
-
             IPAddress selectedIP = currentAddresses[IPBox.SelectedIndex];
 
-            string IPString = selectedIP.ToString();
-            
-            for(int port = min; port < max; port++)
-            {
-                string scanResult = await TryConnectPort(selectedIP, port);
-
-                if (scanResult == null) continue;
-
-                toShow += scanResult;
-            }
+            string toShow = await ScanPortRange(min, max, selectedIP);
             
             if(toShow == string.Empty)
             {
